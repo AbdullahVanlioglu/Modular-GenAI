@@ -1,4 +1,4 @@
-# modular-GenAI
+# Modular-GenAI
 
 Modular-GenAI is a library designed for Generative AI (GenAI) research. Our goal is to provide a flexible, easy-to-use set of components that can be combined in various ways to enable experimentation with different generative AI algorithms. The repository include both PyTorch and Jax implementations of some of the algorithms.
 
