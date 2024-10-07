@@ -1,6 +1,7 @@
 # Modular-GenAI
+> :warning: Under Development
 
-Modular-GenAI is a library designed for Generative AI (GenAI) research. Our goal is to provide a flexible, easy-to-use set of components that can be combined in various ways to enable experimentation with different generative AI algorithms. The repository include both PyTorch and Jax implementations of some of the algorithms.
+Modular-GenAI is a library designed for Generative AI (GenAI) research. Our goal is to provide a flexible, clean and easy-to-use set of components that can be combined in various ways to enable experimentation with different generative AI algorithms. The repository includes both PyTorch and Jax implementations of some of the algorithms.
 
 
 ### **Transformers**
@@ -49,6 +50,7 @@ Modular-GenAI is a library designed for Generative AI (GenAI) research. Our goal
 | DPO |:x:|:x:|
 | LoRA |:x:|:x:|
 | Reinforce Style Optimization |:x:|:x:|
+| Reverse Curriculum Reinforcement Learning |:x:|:x:|
 |**Attention Modules**| | |
 | Sliding Window Attention |:x:|:x:|
 |**Encoders**| | |
@@ -59,4 +61,3 @@ Modular-GenAI is a library designed for Generative AI (GenAI) research. Our goal
 | DDPM |:x:|:heavy_check_mark:|
 |**Search Algorithms**| | |
 | Monte Carlo Tree Search |:x:|:x:|
-| Reverse Curriculum Reinforcement Learning |:x:|:x:|
