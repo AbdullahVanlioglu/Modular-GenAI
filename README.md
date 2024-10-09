@@ -22,7 +22,7 @@ Modular-GenAI is a library designed for Generative AI (GenAI) research. Our goal
 |**Diffusion Transformers**| | |
 |  DiT  |:x:|:x:|
 |**Multimodal Transformers**| | |
-|  Qwen2-VL  |:x:|:x:|
+|  Qwen2.5-VL  |:x:|:x:|
 |**Other Specialized Transformers**| | |
 |  Mamba  |:x:|:x:|
 
