@@ -5,48 +5,28 @@ import logging
 import time
 
 from transformer import Llama2Transformer, Llama2Args
-from typing import Optional
+from typing import Optional, Type
 from sentencepiece import SentencePieceProcessor
 from pathlib import Path
-
-
-class BaseArgs(nn.Module):
-    @classmethod
-    def build(cls, 
-              args: dict, 
-              max_seq_len: int,
-              max_batch_size: int,
-              device: str,
-              **kwargs
-              ):
-        
-        model_args = cls(
-            max_seq_len=max_seq_len,
-            max_batch_size=max_batch_size,
-            device=device,
-            **kwargs
-        )
-
-        model_args = cls(args).to(device)
-        return model_args
-    
 
 class BaseTransformer(nn.Module):
     def __init__(self, 
                  model: Optional[Llama2Transformer], 
                  tokenizer: Optional[SentencePieceProcessor], 
                  model_args: Optional[Llama2Args]):
+        super().__init__()
         self.model = model
         self.tokenizer = tokenizer
-        self.args = model_args
+        self.model_args = model_args
 
     @classmethod
     def build(cls,
+              model_class: Type[nn.Module],
               checkpoints_dir: str, 
               tokenizer_path: str, 
-              load_model: bool, 
-              args: BaseArgs):
-        if load_model:
+              pretrained_model: bool, 
+              args: Optional[Llama2Args]):
+        if pretrained_model:
             checkpoints = sorted(Path(checkpoints_dir).glob("*.pth"))
             
             assert len(checkpoints) > 0, f"no checkpoint files found in {checkpoints_dir}"
@@ -64,16 +44,18 @@ class BaseTransformer(nn.Module):
         args.vocab_size = tokenizer.vocab_size()
         
         if args.device == "cuda":
-            torch.set_default_tensor_type(torch.cuda.HalfTensor)
+            torch.set_default_tensor_type(torch.cuda.FloatTensor)
         else:
             torch.set_default_tensor_type(torch.BFloat16Tensor)
 
-        if load_model:
+        model = model_class(args)
+
+        if pretrained_model:
             del checkpoint['rope.freqs']
             model.load_state_dict(checkpoint, strict=True)
             print(f"Loaded state dict in {time.time() - prev_time:.2f}s")
         
-        return BaseTransformer(model, tokenizer, args)
+        return cls(model, tokenizer, args)
     
 
 
