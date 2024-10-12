@@ -1,0 +1,15 @@
+checkpoint/
+tokenizer/
+wandb/
+cache_dir/
+
+.vscode
+*.DS_Store
+*.pyc
+*.egg-info
+*.pkl
+*.log
+*.json
+*.ckpt
+*.txt
+*.log

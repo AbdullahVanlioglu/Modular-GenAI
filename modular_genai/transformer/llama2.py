@@ -5,7 +5,6 @@ import torch.nn.functional as F
 
 from dataclasses import dataclass
 from typing import Optional
-from transformer import BaseTransformer
 
 
 @dataclass
@@ -184,7 +183,7 @@ class EncoderBlock(nn.Module):
         return out
     
     
-class Llama2Transformer(BaseTransformer):
+class Llama2Transformer(nn.Module):
     def __init__(self, args: Llama2Args):
         super().__init__()
         assert args.vocab_size != -1, "Vocab size must be set"

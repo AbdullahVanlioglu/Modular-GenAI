@@ -4,10 +4,9 @@ import json
 import logging
 import time
 
-from transformer import Llama2Transformer, Llama2Args
 from typing import Optional, Type, Any
-from sentencepiece import SentencePieceProcessor
 from pathlib import Path
+
 
 class BaseTransformer(nn.Module):
     def __init__(self, 
@@ -24,12 +23,14 @@ class BaseTransformer(nn.Module):
     @staticmethod
     def build(model_class: Type[nn.Module],
               checkpoints_dir: str, 
+              tokenizer: Optional[Any],
               tokenizer_path: str, 
               pretrained_model: bool, 
               model_args: Optional[Any],
               encoder_class: Optional[nn.Module] = None,
               encoder_args: Optional[Any] = None
               ):
+        prev_time = time.time()
         if pretrained_model:
             checkpoints = sorted(Path(checkpoints_dir).glob("*.pth"))
             
@@ -43,7 +44,7 @@ class BaseTransformer(nn.Module):
         with open(Path(checkpoints_dir) / "params.json", "r") as f:
             params = json.loads(f.read())
 
-        tokenizer = SentencePieceProcessor()
+        # Inıtialize the tokenizer
         tokenizer.load(tokenizer_path)
         model_args.vocab_size = tokenizer.vocab_size()
         
@@ -52,6 +53,7 @@ class BaseTransformer(nn.Module):
         else:
             torch.set_default_tensor_type(torch.BFloat16Tensor)
 
+        # Inıtialize the transformer
         model = model_class(model_args)
 
         if pretrained_model:
