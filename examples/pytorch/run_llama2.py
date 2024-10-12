@@ -36,9 +36,9 @@ def main():
     )
 
     model = BaseTransformer.build(model_class=Llama2Transformer,
-                                  checkpoints_dir='/mnt/c/Users/avanl/OneDrive/Masaüstü/Modular-GenAI/cache_dir/llama-2-7b/',
+                                  checkpoints_dir='llama-2-7b/',
                                   tokenizer_class=SentencePieceProcessor,
-                                  tokenizer_path='/mnt/c/Users/avanl/OneDrive/Masaüstü/Modular-GenAI/cache_dir/tokenizer.model',
+                                  tokenizer_path='tokenizer.model',
                                   pretrained_model=True,
                                   model_args=model_args,
                                   )
