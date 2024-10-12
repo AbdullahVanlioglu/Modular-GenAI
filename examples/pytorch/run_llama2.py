@@ -24,9 +24,8 @@ def main():
         plush girafe => girafe peluche
         cheese =>""",
         # Zero shot prompt
-        """Tell me if the following person is actually Doraemon disguised as human:
-        Name: Umar Jamil
-        Decision: 
+        """Continue to the song:
+        What is love baby dont hurt me, no more
         """
     ]
 
