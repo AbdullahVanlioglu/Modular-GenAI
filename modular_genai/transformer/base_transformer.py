@@ -11,22 +11,25 @@ from pathlib import Path
 class BaseTransformer(nn.Module):
     def __init__(self, 
                  model: Optional[nn.Module], 
+                 model_args: Optional[Any],
                  tokenizer: Optional[Any], 
                  encoder: Optional[nn.Module] = None,
+                 encoder_args: Optional[Any] = None
                  ):
         super().__init__()
         self.model = model
         self.tokenizer = tokenizer
         self.encoder = encoder
-
+        self.model_args = model_args
+        self.encoder_args = encoder_args
 
     @staticmethod
     def build(model_class: Type[nn.Module],
+              model_args: Optional[Any],
               checkpoints_dir: str, 
               tokenizer: Optional[Any],
               tokenizer_path: str, 
               pretrained_model: bool, 
-              model_args: Optional[Any],
               encoder_class: Optional[nn.Module] = None,
               encoder_args: Optional[Any] = None
               ):
@@ -57,15 +60,14 @@ class BaseTransformer(nn.Module):
         model = model_class(model_args)
 
         if pretrained_model:
+            # Some implementations of LLaMA 2 or fine-tuned versions might handle RoPE differently
+            # Deleted to avoid compatibility issues
             del checkpoint['rope.freqs']
             model.load_state_dict(checkpoint, strict=True)
             print(f"Loaded state dict in {time.time() - prev_time:.2f}s")
 
         # Initialize encoder if provided
-        encoder = encoder_class(encoder_args) if encoder_class else None
-        
-        return BaseTransformer(model, tokenizer, encoder)
+        encoder = encoder_class(encoder_args) if encoder_class else None        
+        return BaseTransformer(model, model_args, tokenizer, encoder, encoder_args)
     
-
-
         

@@ -31,6 +31,14 @@ class Llama2Args:
             Batch size of the key and value
         max_seq_len ('int'):
             Maximum sequence lenght of the key and value
+        max_gen_len ('int'):
+            Maximum output lenght
+        temperature ('float):
+            Temperature affects how the probabilities assigned to the 
+            possible next tokens are used in selecting the token
+        top_p ('float'):
+            Controls how many tokens are considered at each step of 
+            text generation based on their cumulative probability.            
     """
 
     dim: int = 4096
@@ -43,6 +51,9 @@ class Llama2Args:
     norm_eps: float = 1e-5
     max_batch_size: int = 32
     max_seq_len: int = 2048
+    max_gen_len: int = 2048
+    temperature: float = 0.6
+    top_p: float = 0.9
     device: str = None
 
 
