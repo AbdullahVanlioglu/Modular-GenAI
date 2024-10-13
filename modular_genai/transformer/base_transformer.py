@@ -4,6 +4,7 @@ import json
 import logging
 import time
 
+from modular_genai.transformer import Llama2Args
 from typing import Optional, Type, Any
 from pathlib import Path
 
@@ -47,14 +48,19 @@ class BaseTransformer(nn.Module):
         with open(Path(checkpoints_dir) / "params.json", "r") as f:
             params = json.loads(f.read())
 
+        model_args = Llama2Args(
+            **params
+        )
         # Inıtialize the tokenizer
         tokenizer.load(tokenizer_path)
         model_args.vocab_size = tokenizer.vocab_size()
         
         if getattr(model_args, 'device', 'cpu') == "cuda":
-            torch.set_default_tensor_type(torch.cuda.FloatTensor)
+            torch.set_default_dtype(torch.float16)
+            torch.set_default_device(torch.device("cuda"))
         else:
-            torch.set_default_tensor_type(torch.BFloat16Tensor)
+            torch.set_default_dtype(torch.bfloat16)
+            torch.set_default_device(torch.device("cpu"))
 
         # Inıtialize the transformer
         model = model_class(model_args)

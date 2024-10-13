@@ -22,8 +22,8 @@ def sample_top_p(probs, p):
 
 def main():
     seed = torch.manual_seed(0)
-    # device = "cuda" if torch.cuda.is_available() else "cpu"
-    device = "cpu"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # device = "cpu"
 
     prompts = [
     # Scientific explanation
@@ -77,7 +77,7 @@ def main():
 
     llama = BaseTransformer.build(model_class=Llama2Transformer,
                                   model_args=model_args,
-                                  checkpoints_dir='/path/Modular-to/your/llama-2-7b/',
+                                  checkpoints_dir='/path/to/your/llama-2-7b/',
                                   tokenizer=tokenizer,
                                   tokenizer_path='/path/to/your/tokenizer.model',
                                   pretrained_model=True,
