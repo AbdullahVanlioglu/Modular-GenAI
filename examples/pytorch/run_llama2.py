@@ -119,7 +119,7 @@ def main():
 
     out_tokens = []
     out_text = []
-    for prompt_index, current_prompt_tokens in enumerate(tokens.tolist()):
+    for current_prompt_tokens in range(tokens.tolist()):
         # Cut prompt when reach the EOS
         if llama.tokenizer.eos_id() in current_prompt_tokens:
             eos_idx = current_prompt_tokens.index(llama.tokenizer.eos_id())
