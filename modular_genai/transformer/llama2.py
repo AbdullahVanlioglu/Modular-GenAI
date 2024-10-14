@@ -14,28 +14,28 @@ class Llama2Args:
     
     Args:
         dim ('int):
-            Dimension of token embeddings
+            Dimension of token embeddings.
         n_heads ('int'):
-            Number of the heads for the query
+            Number of the heads for the query.
         n_kv_heads ('int'):
-            Number of the heads for the key and value
+            Number of the heads for the key and value.
         output_size ('int'):
-            Output shape of the transformer
+            Output shape of the transformer.
         multiple_of ('int'):
-            FeedForward multiple of parameter
+            FeedForward multiple of parameter.
         ffn_dim_multiplier ('float'):
-            FeedForward hidden_dim multiplayer parameter
+            FeedForward hidden_dim multiplayer parameter.
         norm_eps ('float'):
             epsilon value for the normalization.
         max_batch_size ('int'):
-            Batch size of the key and value
+            Batch size of the key and value.
         max_seq_len ('int'):
-            Maximum sequence lenght of the key and value
+            Maximum sequence lenght of the key and value.
         max_gen_len ('int'):
-            Maximum output lenght
+            Maximum output lenght.
         temperature ('float):
             Temperature affects how the probabilities assigned to the 
-            possible next tokens are used in selecting the token
+            possible next tokens are used in selecting the token.
         top_p ('float'):
             Controls how many tokens are considered at each step of 
             text generation based on their cumulative probability.            
