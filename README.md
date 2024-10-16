@@ -46,7 +46,7 @@ Modular-GenAI is a library designed for Generative AI (GenAI) research. Our goal
 | Components | <img src="https://raw.githubusercontent.com/google/jax/main/images/jax_logo_250px.png" width = 64px alt="logo"></img> | <img src="https://pytorch.org/assets/images/pytorch-logo.png" width = 50px  height = 50px alt="logo"></img> |
 |:-----:|:---------:|:---------:|
 |**Fine Tuning**| | |
-| PPO |:x:|:x:|
+| PPO |:heavy_check_mark:|:heavy_check_mark:|
 | DPO |:x:|:x:|
 | LoRA |:x:|:x:|
 | Reinforce Style Optimization |:x:|:x:|

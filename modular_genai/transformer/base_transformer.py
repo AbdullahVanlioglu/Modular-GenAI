@@ -19,9 +19,9 @@ class BaseTransformer(nn.Module):
                  ):
         super().__init__()
         self.model = model
+        self.model_args = model_args
         self.tokenizer = tokenizer
         self.encoder = encoder
-        self.model_args = model_args
         self.encoder_args = encoder_args
 
     @staticmethod

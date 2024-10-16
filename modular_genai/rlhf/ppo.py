@@ -1,6 +1,8 @@
 import torch
+import torch.nn as nn
 
 from dataclasses import dataclass
+from typing import List, Optional, Union, Dict, Any, Tuple
 
 @dataclass
 class PPOArgs:
@@ -51,3 +53,42 @@ class PPOArgs:
     normalize_advantage: bool
     log_interval: int
     total_timesteps: int
+
+
+class PPO(nn.Module):
+    def __init__(self,
+                 args: PPOArgs,
+                 model: nn.Module,
+                 reward_model: nn.Module,
+                 tokenizer,
+                 batch_size: int
+                 ):
+        self.args = args
+        self.model = model
+        self.reward_model = reward_model
+        self.batch_size = batch_size
+        self.tokenizer = tokenizer
+
+        if not isinstance(self.args, PPOArgs):
+            raise ValueError(f"Args must be a PPOArgs, but got {type(args)}")
+        
+    def generate(self,
+                 queries,
+                 ):
+
+        for query in range(queries):
+            batch_mask = [torch.ones_like(element) for element in query]
+            inputs = {"input_ids": query, "attention_mask": batch_mask}
+
+            padded_inputs = self.tokenizer.pad(
+                inputs,
+                padding=True,
+                max_Length=None,
+            )
+
+    def train(self):
+        self.model.train()
+        raise NotImplementedError
+
+
+
