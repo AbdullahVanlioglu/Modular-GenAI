@@ -38,7 +38,9 @@ class Llama2Args:
             possible next tokens are used in selecting the token.
         top_p ('float'):
             Controls how many tokens are considered at each step of 
-            text generation based on their cumulative probability.            
+            text generation based on their cumulative probability.        
+        device ('str'):
+            Cpu or Cuda    
     """
 
     dim: int = 4096
@@ -203,6 +205,9 @@ class Llama2Transformer(nn.Module):
         self.vocab_size = args.vocab_size
         self.n_layers = args.n_layers
         self.tok_embeddings = nn.Embedding(self.vocab_size, args.dim)
+
+        if not isinstance(self.args, Llama2Args):
+            raise ValueError(f"Args must be a Llama2Args, but got {type(args)}")
 
         self.layers = nn.ModuleList(
             [EncoderBlock(args) for _ in range(args.n_layers)])

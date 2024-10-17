@@ -38,6 +38,8 @@ class PPOArgs:
             Number of updates between logging performance metrics.
         total_timesteps (int): 
             Total number of timesteps to train the agent.
+        Device ('str'):
+            Cpu or Cuda   
     """
     rollout_len: int
     ent_coef: float
@@ -53,6 +55,34 @@ class PPOArgs:
     normalize_advantage: bool
     log_interval: int
     total_timesteps: int
+    value_head_dropout_prob: float = 0.1
+    value_head_hidden_size: int = 2
+    device: str = None
+
+
+class ValueHead(nn.Module):
+    def __init__(self,
+                 args: PPOArgs):
+        self.hidden_size = args.value_head_hidden_size
+        self.dropout_prob = args.value_head_dropout_prob
+
+        self.dropout = nn.Dropout(self.dropout_prob) if self.dropout_prob else nn.Identity()
+        self.network = nn.Linear(self.hidden_size, 1)
+        self.flatten = nn.Flatten()
+
+    def forward(self, x: torch.Tensor):
+        output = self.dropout(x)
+        output = self.network(output)
+
+        return output
+
+
+class LMWithValueHead(nn.Module):
+    def __init__(self,
+                 pretrained_model: Any[nn.Module],
+                 args: PPOArgs,
+                 ):
+        self.value_head = ValueHead(args)
 
 
 class PPO(nn.Module):
@@ -61,12 +91,10 @@ class PPO(nn.Module):
                  model: nn.Module,
                  reward_model: nn.Module,
                  tokenizer,
-                 batch_size: int
                  ):
         self.args = args
         self.model = model
         self.reward_model = reward_model
-        self.batch_size = batch_size
         self.tokenizer = tokenizer
 
         if not isinstance(self.args, PPOArgs):
@@ -84,7 +112,9 @@ class PPO(nn.Module):
                 inputs,
                 padding=True,
                 max_Length=None,
-            )
+                pad_to_multiple_of=None,
+                returns_tensors="pt"
+                ).to(self.args.device)
 
     def train(self):
         self.model.train()

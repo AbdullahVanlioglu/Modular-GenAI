@@ -2,8 +2,6 @@ import torch
 import time
 import json
 
-from typing import Optional
-from pathlib import Path
 from sentencepiece import SentencePieceProcessor
 from tqdm import tqdm
 
@@ -74,6 +72,7 @@ def main():
     )
 
     tokenizer = SentencePieceProcessor()
+    # tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
 
     llama = BaseTransformer.build(model_class=Llama2Transformer,
                                   model_args=model_args,

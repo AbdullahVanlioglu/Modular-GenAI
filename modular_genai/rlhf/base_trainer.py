@@ -1,15 +1,15 @@
 import torch
 import torch.nn as nn
 
-from typing import Optional, Any
+from typing import Optional, Any, Type
 from modular_genai.rlhf import PPOArgs
 
 
 class BaseTrainer(nn.Module):
     def __init__(self, 
-                 model: Optional[nn.Module], 
-                 model_args: Optional[Any],
-                 tokenizer: Optional[Any], 
+                 model: Type[nn.Module], 
+                 model_args: Any,
+                 tokenizer: Any, 
                  ):
         super().__init__()
         self.model = model
@@ -20,7 +20,7 @@ class BaseTrainer(nn.Module):
     def build(model_class,
               model_args: Optional[Any],
               tokenizer: Optional[Any],
-              ) -> "PPO":
+              ):
         struct = np.dtype([
             ("observation", np.float32, observation_space.shape),
             ("next_observation", np.float32, observation_space.shape),

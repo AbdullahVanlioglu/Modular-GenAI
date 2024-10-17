@@ -5,7 +5,7 @@ import logging
 import time
 
 from modular_genai.transformer import Llama2Args
-from typing import Optional, Type, Any
+from typing import Optional, Type, Any, Union
 from pathlib import Path
 
 
