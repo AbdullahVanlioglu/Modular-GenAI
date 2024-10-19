@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from typing import Optional, Any, Type
-from modular_genai.rlhf import PPOArgs
+from modular_genai.finetune import PPOArgs
 
 
 class BaseTrainer(nn.Module):
