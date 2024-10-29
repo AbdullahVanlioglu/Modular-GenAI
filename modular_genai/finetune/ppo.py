@@ -82,7 +82,30 @@ class LMWithValueHead(nn.Module):
                  pretrained_model: Any[nn.Module],
                  args: PPOArgs,
                  ):
+        self.pretrained_model = pretrained_model
         self.value_head = ValueHead(args)
+        self._init_weights()
+
+    def _init_weights(self):
+        self.value_head.network.weight.data.normal_(mean=0.0, std=0.2)
+        self.value_head.network.bias.data.zero_()
+
+    def forward(self,
+                input_ids,
+                prev_key_vals,
+                attention_mask,
+                ):
+        base_model_output = self.pretrained_model(input_ids=input_ids,
+                                                  attention_mask=attention_mask
+                                                  )
+
+        last_hidden_state = base_model_output.hidden_states[-1]
+        lm_logits = base_model_output.logits
+        loss = base_model_output.loss
+
+        value = self.v_head(last_hidden_state).squeeze(-1)
+
+        return (lm_logits, loss, value)
 
 
 class PPO(nn.Module):
