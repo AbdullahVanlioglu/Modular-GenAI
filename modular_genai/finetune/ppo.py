@@ -1,6 +1,9 @@
 import torch
+import logging
+import time
 import torch.nn as nn
 
+from pathlib import Path
 from dataclasses import dataclass
 from typing import List, Optional, Union, Dict, Any, Tuple
 
@@ -79,10 +82,10 @@ class ValueHead(nn.Module):
 
 class LMWithValueHead(nn.Module):
     def __init__(self,
-                 pretrained_model: Any[nn.Module],
+                 base_model: Any[nn.Module],
                  args: PPOArgs,
                  ):
-        self.pretrained_model = pretrained_model
+        self.base_model = base_model
         self.value_head = ValueHead(args)
         self._init_weights()
 
@@ -95,7 +98,7 @@ class LMWithValueHead(nn.Module):
                 prev_key_vals,
                 attention_mask,
                 ):
-        base_model_output = self.pretrained_model(input_ids=input_ids,
+        base_model_output = self.base_model(input_ids=input_ids,
                                                   attention_mask=attention_mask
                                                   )
 
@@ -111,25 +114,34 @@ class LMWithValueHead(nn.Module):
 class PPO(nn.Module):
     def __init__(self,
                  args: PPOArgs,
-                 model: nn.Module,
+                 base_model: nn.Module,
                  reward_model: nn.Module,
                  tokenizer,
                  ):
         self.args = args
-        self.model = model
+        self.model = base_model
         self.reward_model = reward_model
         self.tokenizer = tokenizer
-
-        if not isinstance(self.args, PPOArgs):
-            raise ValueError(f"Args must be a PPOArgs, but got {type(args)}")
         
     def generate(self,
-                 queries,
+                 model: LMWithValueHead,
+                 queries: List[torch.Tensor],
+                 batch_size: int,
+                 length_sampler: Optional[callable] = None,
+                 **generation_kwargs,
                  ):
+        # self.tokenizer.padding_side = "left"
+        padding_side_default = self.tokenizer.padding_side
+        batch_size = min(len(queries), batch_size)
 
-        for query in range(queries):
-            batch_mask = [torch.ones_like(element) for element in query]
-            inputs = {"input_ids": query, "attention_mask": batch_mask}
+        for i in range(0, len(queries), batch_size):
+            if length_sampler is not None:
+                generation_kwargs["max_new_tokens"] = length_sampler()
+            end_index = min(len(queries), i + batch_size)
+
+            batch = queries[i:end_index]
+            batch_mask = [torch.ones_like(element) for element in batch]
+            inputs = {"input_ids": batch, "attention_mask": batch_mask}
 
             padded_inputs = self.tokenizer.pad(
                 inputs,
@@ -139,9 +151,14 @@ class PPO(nn.Module):
                 returns_tensors="pt"
                 ).to(self.args.device)
 
+            outputs = model.forward(padded_inputs, **generation_kwargs)
+
+            for generation, mask in zip(outputs, padded_inputs["attention_mask"]):
+                if padding_side_default == "left":
+                    output = generation[(1 - mask).sum():]
+                else:
+                    output = generation
+
     def train(self):
         self.model.train()
-        raise NotImplementedError
-
-
-
+        

@@ -21,6 +21,10 @@ class BaseTrainer(nn.Module):
               model_args: Optional[Any],
               tokenizer: Optional[Any],
               ):
+        
+        if not isinstance(model_args, PPOArgs):
+            raise ValueError(f"Args must be a PPOArgs, but got {type(model_args)}")
+
         struct = np.dtype([
             ("observation", np.float32, observation_space.shape),
             ("next_observation", np.float32, observation_space.shape),
