@@ -62,6 +62,11 @@ class PPOArgs:
     value_head_hidden_size: int = 2
     device: str = None
 
+class Seq2SeqLMWithValueHead(nn.Module):
+    def __init__(self,
+                 args: PPOArgs):
+        raise NotImplementedError
+
 
 class ValueHead(nn.Module):
     def __init__(self,
@@ -82,7 +87,7 @@ class ValueHead(nn.Module):
 
 class LMWithValueHead(nn.Module):
     def __init__(self,
-                 base_model: Any[nn.Module],
+                 base_model: nn.Module,
                  args: PPOArgs,
                  ):
         self.base_model = base_model
@@ -95,11 +100,16 @@ class LMWithValueHead(nn.Module):
 
     def forward(self,
                 input_ids,
-                prev_key_vals,
+                past_key_values,
                 attention_mask,
+                **kwargs,
                 ):
+        kwargs["output_hidden_states"] = True
+        kwargs["past_key_values"] = past_key_values
+        
         base_model_output = self.base_model(input_ids=input_ids,
-                                                  attention_mask=attention_mask
+                                            attention_mask=attention_mask,
+
                                                   )
 
         last_hidden_state = base_model_output.hidden_states[-1]
@@ -114,17 +124,16 @@ class LMWithValueHead(nn.Module):
 class PPO(nn.Module):
     def __init__(self,
                  args: PPOArgs,
-                 base_model: nn.Module,
+                 model: Any[LMWithValueHead, Seq2SeqLMWithValueHead],
                  reward_model: nn.Module,
                  tokenizer,
                  ):
         self.args = args
-        self.model = base_model
+        self.model = model
         self.reward_model = reward_model
         self.tokenizer = tokenizer
         
     def generate(self,
-                 model: LMWithValueHead,
                  queries: List[torch.Tensor],
                  batch_size: int,
                  length_sampler: Optional[callable] = None,
@@ -151,13 +160,15 @@ class PPO(nn.Module):
                 returns_tensors="pt"
                 ).to(self.args.device)
 
-            outputs = model.forward(padded_inputs, **generation_kwargs)
+            outputs = self.model.forward(**padded_inputs, **generation_kwargs)
 
             for generation, mask in zip(outputs, padded_inputs["attention_mask"]):
                 if padding_side_default == "left":
                     output = generation[(1 - mask).sum():]
                 else:
                     output = generation
+
+            return output
 
     def train(self):
         self.model.train()
