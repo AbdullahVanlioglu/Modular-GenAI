@@ -49,7 +49,7 @@ Modular-GenAI is a library designed for Generative AI (GenAI) research. Our goal
 | PPO |:heavy_check_mark:|:heavy_check_mark:|
 | DPO |:x:|:x:|
 | LoRA |:x:|:x:|
-| Reinforce Style Optimization |:x:|:x:|
+| RLOO |:x:|:x:|
 | Reverse Curriculum Reinforcement Learning |:x:|:x:|
 |**Attention Modules**| | |
 | Sliding Window Attention |:x:|:x:|

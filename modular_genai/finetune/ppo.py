@@ -62,11 +62,53 @@ class PPOArgs:
     value_head_hidden_size: int = 2
     device: str = None
 
-class Seq2SeqLMWithValueHead(nn.Module):
-    def __init__(self,
-                 args: PPOArgs):
-        raise NotImplementedError
+class PolicyAndCriticWrapper(nn.Module):
+    def __init__(self, policy_model, critic_model):
+        super().__init__()
+        self.policy_model = policy_model
+        self.critic_model = critic_model
 
+    def forward(self,
+                x: torch.Tensor,
+                **kwargs):
+        return self.policy_model(input=x, **kwargs), self.critic_model(input=x, only_last=False, **kwargs)
+
+
+class PolicyHead(nn.Module):
+    def __init__(self,
+                 args):
+        self.args = args
+
+
+class LMWithPolicyHead(nn.Module):
+    def __init__(self,
+                 backbone_model: nn.Module,
+                 args):
+        self.backbone_model = backbone_model
+        self.policy_head = PolicyHead(args)
+        self.args = args
+
+    def forward(self,
+                input_ids,
+                past_key_values,
+                attention_mask,
+                **kwargs,
+                ):
+        kwargs["output_hidden_states"] = True
+        kwargs["past_key_values"] = past_key_values
+        
+        backbone_output = self.backbone_model(input_ids=input_ids,
+                                            attention_mask=attention_mask,
+                                                  )
+
+        last_hidden_state = backbone_output.hidden_states[-1]
+        lm_logits = backbone_output.logits
+        loss = backbone_output.loss
+
+        value = self.v_head(last_hidden_state).squeeze(-1)
+
+        return (lm_logits, loss, value)
+        
 
 class ValueHead(nn.Module):
     def __init__(self,
@@ -87,10 +129,10 @@ class ValueHead(nn.Module):
 
 class LMWithValueHead(nn.Module):
     def __init__(self,
-                 base_model: nn.Module,
-                 args: PPOArgs,
+                 backbone_model: nn.Module,
+                 args,
                  ):
-        self.base_model = base_model
+        self.backbone_model = backbone_model
         self.value_head = ValueHead(args)
         self._init_weights()
 
@@ -107,14 +149,13 @@ class LMWithValueHead(nn.Module):
         kwargs["output_hidden_states"] = True
         kwargs["past_key_values"] = past_key_values
         
-        base_model_output = self.base_model(input_ids=input_ids,
+        backbone_output = self.backbone_model(input_ids=input_ids,
                                             attention_mask=attention_mask,
-
                                                   )
 
-        last_hidden_state = base_model_output.hidden_states[-1]
-        lm_logits = base_model_output.logits
-        loss = base_model_output.loss
+        last_hidden_state = backbone_output.hidden_states[-1]
+        lm_logits = backbone_output.logits
+        loss = backbone_output.loss
 
         value = self.v_head(last_hidden_state).squeeze(-1)
 
@@ -123,16 +164,20 @@ class LMWithValueHead(nn.Module):
 
 class PPO(nn.Module):
     def __init__(self,
-                 args: PPOArgs,
-                 model: Any[LMWithValueHead, Seq2SeqLMWithValueHead],
+                 policy_model: nn.Module,
+                 critic_model: nn.Module,
+                 ref_policy_model: nn.Module,
                  reward_model: nn.Module,
+                 args: PPOArgs,
                  tokenizer,
                  ):
-        self.args = args
-        self.model = model
+        super().__init__()
+        self.model = PolicyAndCriticWrapper(policy_model=policy_model, critic_model=critic_model)
+        self.ref_policy_model = ref_policy_model
         self.reward_model = reward_model
+        self.args = args
         self.tokenizer = tokenizer
-        
+
     def generate(self,
                  queries: List[torch.Tensor],
                  batch_size: int,
